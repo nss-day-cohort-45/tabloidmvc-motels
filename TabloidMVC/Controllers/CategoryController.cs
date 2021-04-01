@@ -61,7 +61,7 @@ namespace TabloidMVC.Controllers
                 return NotFound();
             }
             
-            return View();
+            return View(category);
         }
 
         // POST: CategoryController/Edit/5
