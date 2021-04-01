@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic;
 using System.Security.Claims;
+using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
+using System;
+using System.Collections.Generic;
 
 namespace TabloidMVC.Controllers
 {
@@ -68,7 +71,107 @@ namespace TabloidMVC.Controllers
             }
         }
 
+        [Authorize]
+        public IActionResult Edit(int id)
+        {
+
+            int currentUserId = GetCurrentUserProfileId();
+            Post post = _postRepository.GetUserPostById(id, currentUserId);
+            List<Category> categories = _categoryRepository.GetAll();
+
+            PostEditViewModel vm = new PostEditViewModel()
+            {
+                Post = post,
+                CategoryOptions = categories
+            };
+
+            if(post == null)
+            {
+                return NotFound();
+            }
+
+            if(post.UserProfileId == currentUserId)
+            {
+                return View(vm);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Post post)
+        {
+            try
+            {
+                int currentUserId = GetCurrentUserProfileId();
+                Post originalPost = _postRepository.GetUserPostById(id, currentUserId);
+                
+                post.Id = id;
+                post.CreateDateTime = originalPost.CreateDateTime;
+                // Setting this to always be true for easy testing, may need to set this to false later so an admin can approve edits
+                post.IsApproved = true;
+                post.PublishDateTime = originalPost.PublishDateTime;
+                post.UserProfileId = currentUserId;
+
+                _postRepository.UpdatePost(post);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                List<Category> categories = _categoryRepository.GetAll();
+
+                PostEditViewModel vm = new PostEditViewModel()
+                {
+                    Post = post,
+                    CategoryOptions = categories
+                };
+                return View(vm);
+            }
+        }
+
         private int GetCurrentUserProfileId()
+        {
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
+        }
+
+
+
+        [Authorize]
+        public ActionResult Delete(int id)
+        {
+            Post post = _postRepository.GetPublishedPostById(id);
+            int userId = GetCurrentUserId();
+
+            if (post.UserProfileId == userId)
+            {
+                return View(post);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+ 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, Post post)
+        {
+            try
+            {
+                _postRepository.DeletePost(id);
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return View(post);
+            }
+        }
+
+
+        private int GetCurrentUserId()
         {
             string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.Parse(id);
