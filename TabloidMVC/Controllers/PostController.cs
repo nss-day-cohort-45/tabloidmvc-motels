@@ -74,7 +74,9 @@ namespace TabloidMVC.Controllers
         [Authorize]
         public IActionResult Edit(int id)
         {
-            Post post = _postRepository.GetPublishedPostById(id);
+
+            int currentUserId = GetCurrentUserProfileId();
+            Post post = _postRepository.GetUserPostById(id, currentUserId);
             List<Category> categories = _categoryRepository.GetAll();
 
             PostEditViewModel vm = new PostEditViewModel()
@@ -88,7 +90,7 @@ namespace TabloidMVC.Controllers
                 return NotFound();
             }
 
-            if(post.UserProfileId == GetCurrentUserProfileId())
+            if(post.UserProfileId == currentUserId)
             {
                 return View(vm);
             }
@@ -102,8 +104,17 @@ namespace TabloidMVC.Controllers
         {
             try
             {
+                int currentUserId = GetCurrentUserProfileId();
+                Post originalPost = _postRepository.GetUserPostById(id, currentUserId);
+                
                 post.Id = id;
-                _postRepository.Add(post);
+                post.CreateDateTime = originalPost.CreateDateTime;
+                // Setting this to always be true for easy testing, may need to set this to false later so an admin can approve edits
+                post.IsApproved = true;
+                post.PublishDateTime = originalPost.PublishDateTime;
+                post.UserProfileId = currentUserId;
+
+                _postRepository.UpdatePost(post);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
