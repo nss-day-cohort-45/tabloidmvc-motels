@@ -197,6 +197,7 @@ namespace TabloidMVC.Repositories
                 }
             };
         }
+<<<<<<< HEAD
         public void InsertTag(Post post, Tag tag)
         {
             using (SqlConnection conn = Connection)
@@ -215,10 +216,17 @@ namespace TabloidMVC.Repositories
             }
         }
         public void DeleteTag(int postId, int tagId)
+=======
+
+
+
+        public void DeletePost(int postId)
+>>>>>>> b75fd1f1521acf2e93bc9f6d46fa9dc5a54b9022
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
+<<<<<<< HEAD
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"DELETE FROM PostTag
@@ -226,6 +234,17 @@ namespace TabloidMVC.Repositories
                                         AND TagId = @tagId";
                     cmd.Parameters.AddWithValue("@postId", postId);
                     cmd.Parameters.AddWithValue("@tagId", tagId);
+=======
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                            DELETE FROM Post
+                            WHERE Id = @id
+                        ";
+
+                    cmd.Parameters.AddWithValue("@id", postId);
+>>>>>>> b75fd1f1521acf2e93bc9f6d46fa9dc5a54b9022
 
                     cmd.ExecuteNonQuery();
                 }

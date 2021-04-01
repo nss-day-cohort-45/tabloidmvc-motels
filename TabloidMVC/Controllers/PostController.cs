@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic;
 using System.Security.Claims;
+using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
+using System;
 
 namespace TabloidMVC.Controllers
 {
@@ -69,6 +71,47 @@ namespace TabloidMVC.Controllers
         }
 
         private int GetCurrentUserProfileId()
+        {
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
+        }
+
+
+
+        [Authorize]
+        public ActionResult Delete(int id)
+        {
+            Post post = _postRepository.GetPublishedPostById(id);
+            int userId = GetCurrentUserId();
+
+            if (post.UserProfileId == userId)
+            {
+                return View(post);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+ 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, Post post)
+        {
+            try
+            {
+                _postRepository.DeletePost(id);
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return View(post);
+            }
+        }
+
+
+        private int GetCurrentUserId()
         {
             string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.Parse(id);
