@@ -155,6 +155,7 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@IsApproved", post.IsApproved);
                     cmd.Parameters.AddWithValue("@CategoryId", post.CategoryId);
                     cmd.Parameters.AddWithValue("@UserProfileId", post.UserProfileId);
+                    
 
                     post.Id = (int)cmd.ExecuteScalar();
                 }
@@ -179,6 +180,7 @@ namespace TabloidMVC.Repositories
                             IsApproved = @isApproved,
                             CategoryId = @categoryId,
                             UserProfileId = @userProfileId
+                           
                         WHERE id = @id";
 
                     cmd.Parameters.AddWithValue("@title", post.Title);
@@ -190,8 +192,10 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@categoryId", post.CategoryId);
                     cmd.Parameters.AddWithValue("@userProfileId", post.UserProfileId);
                     cmd.Parameters.AddWithValue("@id", post.Id);
+                    
 
                     cmd.ExecuteNonQuery();
+
                 }
             }
         }

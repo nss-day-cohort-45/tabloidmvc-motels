@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using TabloidMVC.Models;
 using TabloidMVC.Repositories;
 
 namespace TabloidMVC.Repositories
 {
-    public class TagRepository : DatabaseConnector, ITagRepository
+    public class TagRepository : BaseRepository, ITagRepository
     {
-        public TagRepository(string connectionString) : base(connectionString) { }
+        public TagRepository( IConfiguration config) : base(config) { }
 
         public List<Tag> GetAllTags()
         {
