@@ -43,6 +43,17 @@
                     <span asp-validation-for="Post.Content" class="text-danger"></span>
                 </div>
                 <div class="form-group">
+                    <label asp-for="Post.Tag" class="control-label"></label>
+                    <select asp-for="Post.Tag" class="form-control">
+                        <option value="">Select Tag</option>
+                        @foreach (Tag tag in Model.Tags)
+                        {
+                            <option value="@tag.Id">@tag.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Post.Tag" class="text-danger"></span>
+                </div>
+                <div class="form-group">
                     <input type="submit" value="SAVE" class="btn btn-primary btn-block" />
                 </div>
             </form>

@@ -58,7 +58,7 @@ namespace TabloidMVC.Controllers
                 vm.Post.CreateDateTime = DateAndTime.Now;
                 vm.Post.IsApproved = true;
                 vm.Post.UserProfileId = GetCurrentUserProfileId();
-
+                
                 _postRepository.Add(vm.Post);
 
                 return RedirectToAction("Details", new { id = vm.Post.Id });
@@ -115,6 +115,21 @@ namespace TabloidMVC.Controllers
         {
             string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.Parse(id);
+        }
+
+        public IActionResult InsertTag(Post post, Tag tag)
+        {
+            try
+            {
+                _postRepository.InsertTag(post, tag);
+
+                return RedirectToAction("Details");
+            }
+            catch (Exception ex)
+            {
+                return View(post);
+            }
+
         }
     }
 }
