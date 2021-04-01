@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TabloidMVC.Models;
 
+
 namespace TabloidMVC.Controllers
 {
     public class HomeController : Controller
