@@ -69,6 +69,7 @@ namespace TabloidMVC.Repositories
                               ut.[Name] AS UserTypeName
                        FROM UserProfile u
                               LEFT JOIN UserType ut ON u.UserTypeId = ut.id
+                              ORDER BY u.FirstName ASC
                     ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
