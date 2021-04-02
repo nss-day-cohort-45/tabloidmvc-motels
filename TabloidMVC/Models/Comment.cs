@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace TabloidMVC.Models
 {
@@ -6,10 +8,13 @@ namespace TabloidMVC.Models
     {
         public int Id { get; set; }
         public int PostId { get; set; }
-        public string PostTitle { get; set; }
         public int UserProfileId { get; set; }
-        public string Author { get; set; }
+        public UserProfile Author { get; set; }
+
+        [Required]
         public string Subject { get; set; }
+
+        [Required]
         public string Content { get; set; }
         public DateTime CreateDateTime { get; set; }
     }

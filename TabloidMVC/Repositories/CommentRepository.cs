@@ -24,7 +24,31 @@ namespace TabloidMVC.Repositories
             }
         }
 
+        public void AddComment(Comment comment)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                INSERT INTO Comment (Subject, Content, PostId, UserProfileId, CreateDateTime)
+                OUTPUT INSERTED.ID
+                VALUES (@subject, @content, @postId, @userProfileId, @createDateTime);
+            ";
 
+                    cmd.Parameters.AddWithValue("@subject", comment.Subject);
+                    cmd.Parameters.AddWithValue("@content", comment.Content);
+                    cmd.Parameters.AddWithValue("@userProfileId", comment.UserProfileId);
+                    cmd.Parameters.AddWithValue("@createDateTime", comment.CreateDateTime);
+                    cmd.Parameters.AddWithValue("@postId", comment.PostId);
+                    int newlyCreatedId = (int)cmd.ExecuteScalar();
+
+                    comment.Id = newlyCreatedId;
+
+                }
+            }
+        }
 
 
         public List<Comment> GetAllComments()
@@ -57,10 +81,9 @@ namespace TabloidMVC.Repositories
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             PostId = reader.GetInt32(reader.GetOrdinal("PostId")),
-                            PostTitle = reader.GetString(reader.GetOrdinal("Title")),
                             UserProfileId = reader.GetInt32(reader.GetOrdinal("UserProfileId")),
-                            Author = reader.GetString(reader.GetOrdinal("Author")),
                             Subject = reader.GetString(reader.GetOrdinal("Subject")),
+                            Author = new UserProfile() { FirstName = reader.GetString(reader.GetOrdinal("Author"))}, 
                             Content = reader.GetString(reader.GetOrdinal("Content")),
                             CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime"))
                         };
@@ -106,10 +129,9 @@ namespace TabloidMVC.Repositories
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             PostId = reader.GetInt32(reader.GetOrdinal("PostId")),
-                            PostTitle = reader.GetString(reader.GetOrdinal("Title")),
                             UserProfileId = reader.GetInt32(reader.GetOrdinal("UserProfileId")),
-                            Author = reader.GetString(reader.GetOrdinal("Author")),
                             Subject = reader.GetString(reader.GetOrdinal("Subject")),
+                            Author = new UserProfile() { FirstName = reader.GetString(reader.GetOrdinal("Author")) },
                             Content = reader.GetString(reader.GetOrdinal("Content")),
                             CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime"))
                         };
@@ -157,10 +179,9 @@ namespace TabloidMVC.Repositories
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             PostId = reader.GetInt32(reader.GetOrdinal("PostId")),
-                            PostTitle = reader.GetString(reader.GetOrdinal("Title")),
                             UserProfileId = reader.GetInt32(reader.GetOrdinal("UserProfileId")),
-                            Author = reader.GetString(reader.GetOrdinal("Author")),
                             Subject = reader.GetString(reader.GetOrdinal("Subject")),
+                            Author = new UserProfile() { FirstName = reader.GetString(reader.GetOrdinal("Author")) },
                             Content = reader.GetString(reader.GetOrdinal("Content")),
                             CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime"))
                         };

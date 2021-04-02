@@ -1,16 +1,12 @@
-﻿@model IEnumerable<TabloidMVC.Models.Comment>
+﻿@model TabloidMVC.Models.ViewModels.PostCommentsViewModel
 
 @{
     ViewData["Title"] = "Index"
     ;
 }
 
-@foreach (var item in Model)
-{
-    <h3>
-        @Html.DisplayFor(modelItem => item.PostTitle)
-    </h3>
-}
+
+<h1 class="mb-4">@Model.Post.Title</h1>
 
 
 <p>
@@ -20,26 +16,26 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Author)
+                Author
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Subject)
+                Subject
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Content)
+                Content
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreateDateTime)
+                CreateDateTime
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Comments)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Author)
+                    @Html.DisplayFor(modelItem => item.Author.FirstName)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Subject)

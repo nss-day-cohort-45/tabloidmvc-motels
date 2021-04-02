@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TabloidMVC.Models;
+using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
 
 namespace TabloidMVC.Controllers
@@ -12,19 +14,28 @@ namespace TabloidMVC.Controllers
     public class CommentsController : Controller
     {
         private readonly ICommentRepository _commentRepo;
+        private readonly IPostRepository _postRepository;
+
 
         // ASP.NET will give us an instance of our Walker Repository. This is called "Dependency Injection"
-        public CommentsController(ICommentRepository commentRepository)
+        public CommentsController(ICommentRepository commentRepository, IPostRepository postRepository)
         {
             _commentRepo = commentRepository;
+            _postRepository = postRepository;
         }
 
 
         // GET: CommentsController
         public ActionResult Index(int id)
         {
+            Post post = _postRepository.GetPublishedPostById(id);
             List<Comment> comments = _commentRepo.GetAllCommentsByPost(id);
-            return View(comments);
+            PostCommentsViewModel vm = new PostCommentsViewModel()
+            {
+                Post = post,
+                Comments = comments
+            };
+            return View(vm);
         }
 
         // GET: CommentsController/Details/5
@@ -46,23 +57,36 @@ namespace TabloidMVC.Controllers
         // GET: CommentsController/Create
         public ActionResult Create()
         {
+
             return View();
         }
+       
 
-        // POST: CommentsController/Create
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create( Comment comment)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
+                   // comment.PostId(int id)
+                // update the dogs OwnerId to the current user's Id 
+                comment.UserProfileId = GetCurrentUserId();
+                //comment.PostId = id
+                DateTime dt = DateTime.Now;
+                comment.CreateDateTime = dt;
+                _commentRepo.AddComment(comment);
+                        
+
+                        return RedirectToAction("Index", new { id = comment.PostId });
+                    }  
+            catch (Exception ex)
             {
-                return View();
+                return View(comment);
             }
         }
+
+
 
         // GET: CommentsController/Edit/5
         public ActionResult Edit(int id)
@@ -104,6 +128,12 @@ namespace TabloidMVC.Controllers
             {
                 return View();
             }
+        }
+
+        private int GetCurrentUserId()
+        {
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
         }
     }
 }
