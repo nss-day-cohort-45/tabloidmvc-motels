@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -98,6 +99,37 @@ namespace TabloidMVC.Controllers
                 return View();
             }
         }
+
+        // GET: UserProfileController/DeactivateUser/5
+        [Authorize]
+        public ActionResult DeactivateUser(int id)
+        {
+            UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
+
+            if(userProfile.UserTypeId == 1)
+            {
+                return View(userProfile);
+            }
+           
+            return NotFound();
+        }
+
+        // POST: UserProfileController/DeactivateUser/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeactivateUser(int id, UserProfile userProfile)
+        {
+            try
+            {
+                _userProfileRepository.DeactivateUserById(id);
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
 
         private int GetCurrentUserId()
         {
