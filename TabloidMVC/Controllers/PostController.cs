@@ -28,6 +28,7 @@ namespace TabloidMVC.Controllers
         public IActionResult Index()
         {
             var posts = _postRepository.GetAllPublishedPosts();
+            List<Post> GetTagByPostId();
             return View(posts);
         }
 
@@ -82,12 +83,13 @@ namespace TabloidMVC.Controllers
             Post post = _postRepository.GetUserPostById(id, currentUserId);
             List<Category> categories = _categoryRepository.GetAll();
             List<Tag> tags = _tagRepository.GetAllTags();
+            
             PostEditViewModel vm = new PostEditViewModel()
             {
                 Post = post,
                 CategoryOptions = categories,
-                Tags = tags
-                
+                Tags = tags,
+                Tag = new Tag()
             };
 
             if(post == null)
@@ -125,11 +127,13 @@ namespace TabloidMVC.Controllers
             catch (Exception ex)
             {
                 List<Category> categories = _categoryRepository.GetAll();
-
+                List<Tag> tags = _tagRepository.GetAllTags();
                 PostEditViewModel vm = new PostEditViewModel()
                 {
                     Post = post,
-                    CategoryOptions = categories
+                    CategoryOptions = categories,
+                    Tags = tags,
+                    Tag = new Tag()
                 };
                 return View(vm);
             }

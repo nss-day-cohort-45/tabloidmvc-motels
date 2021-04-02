@@ -36,5 +36,6 @@ namespace TabloidMVC.Models
 
         [DisplayName("Tags")]
         public string Tag { get; set; }
+        public Tag tag { get; set; }
     }
 }
