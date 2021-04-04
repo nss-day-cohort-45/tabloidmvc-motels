@@ -106,7 +106,11 @@ namespace TabloidMVC.Controllers
         {
             UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
 
-            if(userProfile.UserTypeId == 1)
+            int userId = GetCurrentUserId();
+
+            UserProfile currentUser = _userProfileRepository.GetUserProfileById(userId);
+
+            if(currentUser.UserTypeId == 1)
             {
                 return View(userProfile);
             }
@@ -122,6 +126,40 @@ namespace TabloidMVC.Controllers
             try
             {
                 _userProfileRepository.DeactivateUserById(id);
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: UserProfileController/DeactivatedProfiles/5
+        [Authorize]
+        public ActionResult DeactivatedProfiles()
+        {
+            List<UserProfile> userProfiles = _userProfileRepository.GetDeactivatedProfiles();
+
+            int userId = GetCurrentUserId();
+
+            UserProfile currentUser = _userProfileRepository.GetUserProfileById(userId);
+
+            if (currentUser.UserTypeId == 1)
+            {
+                return View(userProfiles);
+            }
+
+            return NotFound();
+        }
+
+        // POST: UserProfileController/DeactivatedProfiles/5
+        [HttpPost]
+       
+        public ActionResult DeactivatedProfiles(int id)
+        {
+            try
+            {
+                _userProfileRepository.ReactivateUserById(id);
                 return RedirectToAction("Index");
             }
             catch

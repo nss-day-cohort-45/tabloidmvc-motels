@@ -172,5 +172,78 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+
+        public void ReactivateUserById(int id)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        UPDATE UserProfile 
+                            SET
+                                Deactivated = 0
+                        WHERE id = @id";
+
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public List<UserProfile> GetDeactivatedProfiles()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                       SELECT u.id, u.FirstName, u.LastName, u.DisplayName, u.Email,
+                              u.CreateDateTime, u.ImageLocation, u.UserTypeId,
+                              ut.[Name] AS UserTypeName, u.Deactivated
+                       FROM UserProfile u
+                              LEFT JOIN UserType ut ON u.UserTypeId = ut.id
+                              WHERE u.Deactivated = 1
+                              ORDER BY u.DisplayName ASC
+                    ";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    List<UserProfile> profiles = new List<UserProfile>();
+
+                    while (reader.Read())
+                    {
+                        UserProfile profile = new UserProfile
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            DisplayName = reader.GetString(reader.GetOrdinal("DisplayName")),
+                            Email = reader.GetString(reader.GetOrdinal("Email")),
+                            CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                            ImageLocation = reader.IsDBNull(reader.GetOrdinal("ImageLocation"))
+                            ? null
+                            : reader.GetString(reader.GetOrdinal("ImageLocation")),
+                            UserTypeId = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
+                            UserType = new UserType()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
+                                Name = reader.GetString(reader.GetOrdinal("UserTypeName"))
+                            },
+                            Deactivated = reader.GetBoolean(reader.GetOrdinal("Deactivated"))
+
+
+                        };
+
+                        profiles.Add(profile);
+                    }
+
+                    reader.Close();
+                    return profiles;
+                }
+            }
+        }
     }
 }
