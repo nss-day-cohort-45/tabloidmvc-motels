@@ -154,12 +154,11 @@ namespace TabloidMVC.Controllers
 
         // POST: UserProfileController/DeactivatedProfiles/5
         [HttpPost]
-       
-        public ActionResult DeactivatedProfiles(int id)
+        public ActionResult DeactivatedProfiles(int id, UserProfile userProfile)
         {
             try
             {
-                _userProfileRepository.ReactivateUserById(id);
+                _userProfileRepository.ReactivateUserById(userProfile.Id);
                 return RedirectToAction("Index");
             }
             catch
