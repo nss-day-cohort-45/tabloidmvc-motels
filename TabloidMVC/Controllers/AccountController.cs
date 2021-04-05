@@ -34,6 +34,12 @@ namespace TabloidMVC.Controllers
                 return View();
             }
 
+            if(userProfile.Deactivated == true)
+            {
+                ModelState.AddModelError("Email", "Invalid email");
+                return View();
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userProfile.Id.ToString()),
