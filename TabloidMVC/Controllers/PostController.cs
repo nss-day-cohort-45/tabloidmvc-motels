@@ -8,6 +8,7 @@ using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TabloidMVC.Controllers
 {
@@ -28,13 +29,14 @@ namespace TabloidMVC.Controllers
         public IActionResult Index()
         {
             var posts = _postRepository.GetAllPublishedPosts();
-            List<Post> GetTagByPostId();
+            
             return View(posts);
         }
 
         public IActionResult Details(int id)
         {
             var post = _postRepository.GetPublishedPostById(id);
+            List<Post> PostWithTags = _postRepository.GetTagByPostId(id);
             if (post == null)
             {
                 int userId = GetCurrentUserProfileId();
@@ -44,14 +46,34 @@ namespace TabloidMVC.Controllers
                     return NotFound();
                 }
             }
-            return View(post);
+           
+            PostDetailsViewModel vm = new PostDetailsViewModel()
+            {
+                Post = post,
+                TagsByPostId = PostWithTags,
+                
+            };
+            return View(vm);
         }
 
         public IActionResult Create()
         {
             var vm = new PostCreateViewModel();
+            var AllTags = _tagRepository.GetAllTags();
+            vm.Tags = new List<SelectListItem>();
+            foreach (Tag tag in AllTags)
+            {
+                SelectListItem tagOption = new SelectListItem()
+                {
+                    Value = tag.Id.ToString(),
+                    Text = tag.Name
+                };
+                vm.Tags.Add(tagOption);
+            }
+
             vm.CategoryOptions = _categoryRepository.GetAll();
-            vm.Tags = _tagRepository.GetAllTags();
+                       
+            
             return View(vm);
         }
 
@@ -65,6 +87,11 @@ namespace TabloidMVC.Controllers
                 vm.Post.UserProfileId = GetCurrentUserProfileId();
                 
                 _postRepository.Add(vm.Post);
+
+                foreach(var tagId in vm.SelectedTags)
+                {
+                    _postRepository.InsertTag(vm.Post.Id, tagId);
+                }
                 
                 return RedirectToAction("Details", new { id = vm.Post.Id });
             } 
@@ -186,19 +213,6 @@ namespace TabloidMVC.Controllers
             return int.Parse(id);
         }
 
-        public IActionResult InsertTag(Post post, Tag tag)
-        {
-            try
-            {
-                _postRepository.InsertTag(post, tag);
-
-                return RedirectToAction("Details");
-            }
-            catch (Exception ex)
-            {
-                return View(post);
-            }
-
-        }
+       
     }
 }

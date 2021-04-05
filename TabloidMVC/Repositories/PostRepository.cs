@@ -164,17 +164,17 @@ namespace TabloidMVC.Repositories
 
                     post.Id = (int)cmd.ExecuteScalar();
                 }
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"    
-                        INSERT INTO PostTag( PostId, TagId ) 
-                        VALUES ( @PostId, @TagId )";
+                //using (var cmd = conn.CreateCommand())
+                //{
+                //    cmd.CommandText = @"    
+                //        INSERT INTO PostTag( PostId, TagId ) 
+                //        VALUES ( @PostId, @TagId )";
 
-                    cmd.Parameters.AddWithValue("@PostId", post.Id);
-                    cmd.Parameters.AddWithValue("@TagId", Int32.Parse(post.Tag));
+                //    cmd.Parameters.AddWithValue("@PostId", post.Id);
+                //    cmd.Parameters.AddWithValue("@TagId", Int32.Parse(post.Tag));
 
-                    cmd.ExecuteNonQuery();
-                }
+                //    cmd.ExecuteNonQuery();
+                //}
             }
         }
 
@@ -273,7 +273,7 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
-        public void InsertTag(Post post, Tag tag)
+        public void InsertTag(int postId, int tagId)
         {
             using (SqlConnection conn = Connection)
             {
@@ -283,8 +283,8 @@ namespace TabloidMVC.Repositories
                     cmd.CommandText = @"INSERT INTO PostTag (PostId, TagId)
                                         VALUES (@postId, @tagId)";
 
-                    cmd.Parameters.AddWithValue("@postId", post.Id);
-                    cmd.Parameters.AddWithValue("@tagId", tag.Id);
+                    cmd.Parameters.AddWithValue("@postId", postId);
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
 
                     cmd.ExecuteNonQuery();
                 }
@@ -330,24 +330,18 @@ namespace TabloidMVC.Repositories
                     {
                         Post post = new Post
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Title = reader.GetString(reader.GetOrdinal("Title")),
-                            Content = reader.GetString(reader.GetOrdinal("Content")),
-                            ImageLocation = DbUtils.GetNullableString(reader, "HeaderImage"),
-                            CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
-                            PublishDateTime = DbUtils.GetNullableDateTime(reader, "PublishDateTime"),
+                           
                             tag = new Tag
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                 Name = reader.GetString(reader.GetOrdinal("Name"))
-                            }
+                            },
 
-
-                            posts.Add(post);
-                        }
+                        };
+                        posts.Add(post);
+                    }
                     reader.Close();
                     return posts;
-                    }
                 }
             }
         }
