@@ -1,0 +1,64 @@
+﻿@model TabloidMVC.Models.UserProfile
+
+@{
+    ViewData["Title"] = "DeactivateUser";
+}
+
+<h1>Deactivate User</h1>
+
+<hr />
+<div class="container pt-5">
+    <div class="row justify-content-center">
+        <div class="card col-md-12 col-lg-8">
+            <h3 class="mt-3 text-primary text-center card-title">What would you like to deactivate this user?</h3>
+            <hr />
+            <section class="container">
+                <h1 class="mb-4">@Model.FullName</h1>
+
+                @if (Model.ImageLocation == null)
+                {
+                    <img style="width:100px;float:left;margin-right:20px"
+                         src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_user-circle.svg" />
+                }
+                else
+                {
+                    <img style="width:100px;float:left;margin-right:20px"
+                         src="@Model.ImageLocation" />
+                }
+                <div>
+                    <label class="font-weight-bold">Display Name:</label>
+                    <span>@Model.DisplayName</span>
+                </div>
+                <div>
+                    <label class="font-weight-bold">Email:</label>
+                    <span>@Model.Email</span>
+                </div>
+                <div>
+                    <label class="font-weight-bold">Creation Date:</label>
+                    <span>@Model.CreateDateTime</span>
+                </div>
+                <div>
+                    <label class="font-weight-bold">User Profile Type:</label>
+                    <span>@Model.UserType.Name</span>
+                </div>
+
+                <hr />
+
+                <form asp-action="DeactivateUser">
+                    <input type="submit" value="Deactivate User"  class="btn btn-danger" />
+                    <button asp-action="Index" value="Cancel" class="btn btn-primary">Cancel</button>
+                </form>
+
+                <p></p>
+
+            </section>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
