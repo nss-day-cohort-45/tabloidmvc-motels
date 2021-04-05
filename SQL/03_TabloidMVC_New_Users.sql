@@ -1,4 +1,13 @@
-﻿/* Admin accounts to test with */
+﻿/* Add Deactivated column to UserProfile table */
+
+ALTER TABLE UserProfile
+ADD Deactivated bit;
+
+UPDATE UserProfile
+SET Deactivated = 0
+WHERE id = 1;
+
+/* Admin accounts to test with */
 
 INSERT INTO [UserProfile] (
 	   [FirstName], [LastName], [DisplayName], [Email], [CreateDateTime], [ImageLocation], [UserTypeId], [Deactivated])
@@ -20,7 +29,7 @@ VALUES ('Ryan', 'Y', 'adminRyan', 'ryan@example.com', SYSDATETIME(), NULL, 1, 0)
 /* Author accounts to test with */
 INSERT INTO [UserProfile] (
 	   [FirstName], [LastName], [DisplayName], [Email], [CreateDateTime], [ImageLocation], [UserTypeId], [Deactivated])
-VALUES ('Joe', 'S', 'Joes', 'jordan@example.com', SYSDATETIME(), NULL, 2, 0);
+VALUES ('Joe', 'S', 'Joes', 'joe@example.com', SYSDATETIME(), NULL, 2, 0);
 
 INSERT INTO [UserProfile] (
 	   [FirstName], [LastName], [DisplayName], [Email], [CreateDateTime], [ImageLocation], [UserTypeId], [Deactivated])
