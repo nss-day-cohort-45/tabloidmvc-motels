@@ -22,5 +22,6 @@ namespace TabloidMVC.Models
                 return $"{FirstName} {LastName}";
             }
         }
+        public bool Deactivated { get; set; }
     }
 }

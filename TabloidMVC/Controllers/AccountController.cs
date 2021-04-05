@@ -34,11 +34,23 @@ namespace TabloidMVC.Controllers
                 return View();
             }
 
+            if(userProfile.Deactivated == true)
+            {
+                ModelState.AddModelError("Email", "Invalid email");
+                return View();
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userProfile.Id.ToString()),
                 new Claim(ClaimTypes.Email, userProfile.Email),
+                
             };
+
+            if(userProfile.UserType.Id == 1)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
 
             var claimsIdentity = new ClaimsIdentity(
                 claims, CookieAuthenticationDefaults.AuthenticationScheme);
