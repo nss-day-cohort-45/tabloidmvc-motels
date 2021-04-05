@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
@@ -16,13 +15,14 @@ namespace TabloidMVC.Controllers
         private readonly ICommentRepository _commentRepo;
         private readonly IPostRepository _postRepository;
 
-
-        // ASP.NET will give us an instance of our Walker Repository. This is called "Dependency Injection"
         public CommentsController(ICommentRepository commentRepository, IPostRepository postRepository)
         {
             _commentRepo = commentRepository;
             _postRepository = postRepository;
         }
+
+
+
 
 
         // GET: CommentsController
@@ -42,7 +42,6 @@ namespace TabloidMVC.Controllers
         public ActionResult Details(int id)
         {
             var comment = _commentRepo.GetCommentById(id);
-
             if (comment == null)
             {
                 comment = _commentRepo.GetCommentById(id);
@@ -54,32 +53,30 @@ namespace TabloidMVC.Controllers
             return View(comment);
         }
 
+
+
+
+
         // GET: CommentsController/Create
         public ActionResult Create()
         {
-
             return View();
         }
        
-
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create( Comment comment)
         {
             try
             {
-                   // comment.PostId(int id)
-                // update the dogs OwnerId to the current user's Id 
                 comment.UserProfileId = GetCurrentUserId();
-                //comment.PostId = id
                 DateTime dt = DateTime.Now;
                 comment.CreateDateTime = dt;
                 _commentRepo.AddComment(comment);
                         
 
-                        return RedirectToAction("Index", new { id = comment.PostId });
-                    }  
+                return RedirectToAction("Index", new { id = comment.PostId });
+            }  
             catch (Exception ex)
             {
                 return View(comment);
@@ -88,47 +85,91 @@ namespace TabloidMVC.Controllers
 
 
 
+
         // GET: CommentsController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            Comment comment = _commentRepo.GetCommentById(id);
+            int userId = GetCurrentUserId();
+
+
+            if (comment == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                if (comment.UserProfileId == userId)
+                {
+                    return View(comment);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+
         }
 
         // POST: CommentsController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Comment comment)
         {
+            comment.Id = id;
             try
             {
-                return RedirectToAction(nameof(Index));
+                _commentRepo.EditComment(comment);
+              
+                return RedirectToAction("Index", new { id = comment.PostId });
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return View(comment);
             }
         }
 
-        // GET: CommentsController/Delete/5
+
+
+
+
+        // GET: DogsController/Delete/5
+        [Authorize]
         public ActionResult Delete(int id)
         {
-            return View();
+            Comment comment = _commentRepo.GetCommentById(id);
+            int ownerId = GetCurrentUserId();
+
+            if (comment.UserProfileId == ownerId)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
-        // POST: CommentsController/Delete/5
+        // POST: DogsController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Comment comment)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _commentRepo.DeleteComment(id);
+
+                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return View(comment);
             }
         }
+
+
+
+
 
         private int GetCurrentUserId()
         {

@@ -10,7 +10,6 @@ namespace TabloidMVC.Repositories
     {
         private readonly IConfiguration _config;
 
-        // The constructor accepts an IConfiguration object as a parameter. This class comes from the ASP.NET framework and is useful for retrieving things out of the appsettings.json file like connection strings.
         public CommentRepository(IConfiguration config)
         {
             _config = config;
@@ -23,6 +22,10 @@ namespace TabloidMVC.Repositories
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
+
+
+
+
 
         public void AddComment(Comment comment)
         {
@@ -49,6 +52,9 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+
+
+
 
 
         public List<Comment> GetAllComments()
@@ -99,6 +105,8 @@ namespace TabloidMVC.Repositories
 
 
 
+
+
         public List<Comment> GetAllCommentsByPost(int id)
         {
             using (SqlConnection conn = Connection)
@@ -144,6 +152,8 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+
+
 
 
 
@@ -197,5 +207,53 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+
+
+
+
+            public void EditComment(Comment comment)
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                            UPDATE Comment
+                            SET 
+                                Subject = @subject, 
+                                Content = @content
+                            WHERE Id = @id";
+
+
+                        cmd.Parameters.AddWithValue("@subject", comment.Subject);
+                        cmd.Parameters.AddWithValue("@content", comment.Content);
+                        cmd.Parameters.AddWithValue("@id", comment.Id);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            public void DeleteComment(int commentId)
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                            DELETE FROM Comment
+                            WHERE Id = @id
+                        ";
+
+                        cmd.Parameters.AddWithValue("@id", commentId);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+
     }
 }
