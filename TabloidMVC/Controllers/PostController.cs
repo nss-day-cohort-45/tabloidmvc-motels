@@ -28,9 +28,15 @@ namespace TabloidMVC.Controllers
 
         public IActionResult Index()
         {
-            var posts = _postRepository.GetAllPublishedPosts();
-            
-            return View(posts);
+            List<Post> posts = _postRepository.GetAllPublishedPosts();
+            List<Tag> tags = _tagRepository.GetTagsByPostId();
+            PostIndexViewModel vm = new PostIndexViewModel()
+            {
+                Posts = posts,
+                Tags = tags
+            };
+
+            return View(vm);
         }
 
         public IActionResult Details(int id)
