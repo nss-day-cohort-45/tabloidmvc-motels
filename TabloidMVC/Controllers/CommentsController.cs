@@ -120,7 +120,6 @@ namespace TabloidMVC.Controllers
             try
             {
                 _commentRepo.EditComment(comment);
-              
                 return RedirectToAction("Index", new { id = comment.PostId });
             }
             catch (Exception ex)
@@ -133,16 +132,16 @@ namespace TabloidMVC.Controllers
 
 
 
-        // GET: DogsController/Delete/5
+        // GET: CommentsController/Delete/5
         [Authorize]
-        public ActionResult Delete(int id) //this id is the comment id 
+        public ActionResult Delete(int id) 
         {
-            Comment comment = _commentRepo.GetCommentById(id); //this comment does have the correct PostId
+            Comment comment = _commentRepo.GetCommentById(id);
 
-            int ownerId = GetCurrentUserId();
-            if (comment.UserProfileId == ownerId)
+            int userId = GetCurrentUserId();
+            if (comment.UserProfileId == userId)
             {
-                return View(comment); //this comment does have the correct PostId
+                return View(comment);
             }
             else
             {
@@ -150,7 +149,7 @@ namespace TabloidMVC.Controllers
             }
         }
 
-        // POST: DogsController/Delete/5
+        // POST: CommentsController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, Comment comment)
