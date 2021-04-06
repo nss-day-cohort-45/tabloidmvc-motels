@@ -42,7 +42,11 @@ namespace TabloidMVC.Controllers
         public IActionResult Details(int id)
         {
             var post = _postRepository.GetPublishedPostById(id);
+
             List<Post> PostWithTags = _postRepository.GetTagByPostId(id);
+
+            
+
             if (post == null)
             {
                 int userId = GetCurrentUserProfileId();
