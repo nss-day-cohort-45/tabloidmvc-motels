@@ -164,17 +164,7 @@ namespace TabloidMVC.Repositories
 
                     post.Id = (int)cmd.ExecuteScalar();
                 }
-                //using (var cmd = conn.CreateCommand())
-                //{
-                //    cmd.CommandText = @"    
-                //        INSERT INTO PostTag( PostId, TagId ) 
-                //        VALUES ( @PostId, @TagId )";
-
-                //    cmd.Parameters.AddWithValue("@PostId", post.Id);
-                //    cmd.Parameters.AddWithValue("@TagId", Int32.Parse(post.Tag));
-
-                //    cmd.ExecuteNonQuery();
-                //}
+               
             }
         }
 
