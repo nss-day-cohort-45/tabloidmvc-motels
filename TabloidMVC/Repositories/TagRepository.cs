@@ -18,7 +18,7 @@ namespace TabloidMVC.Repositories
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT id, Name FROM Tag";
+                    cmd.CommandText = @"SELECT id, Name FROM Tag ORDER BY Name Asc";
                     List<Tag> tags = new List<Tag>();
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -46,7 +46,7 @@ namespace TabloidMVC.Repositories
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Name, Content FROM Tag Where Id = @id";
+                    cmd.CommandText = "SELECT Name, Id FROM Tag Where Id = @id";
                     cmd.Parameters.AddWithValue("@id", id);
                     SqlDataReader reader = cmd.ExecuteReader();
 

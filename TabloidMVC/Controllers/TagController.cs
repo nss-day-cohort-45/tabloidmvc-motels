@@ -61,10 +61,11 @@ namespace TabloidMVC.Controllers
         // POST: TagController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(Tag tag, IFormCollection collection)
         {
             try
             {
+                _tagRepository.UpdateTag(tag);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -76,7 +77,8 @@ namespace TabloidMVC.Controllers
         // GET: TagController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            Tag tag = _tagRepository.GetTag(id);
+            return View(tag);
         }
 
         // POST: TagController/Delete/5
