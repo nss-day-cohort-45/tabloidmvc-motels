@@ -29,13 +29,11 @@ namespace TabloidMVC.Repositories
                               u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
                               u.UserTypeId, 
                               ut.[Name] AS UserTypeName,
-                              t.Name AS Tag
+                              p.DELETED
                          FROM Post p
                               LEFT JOIN Category c ON p.CategoryId = c.id
                               LEFT JOIN UserProfile u ON p.UserProfileId = u.id
                               LEFT JOIN UserType ut ON u.UserTypeId = ut.id
-                              LEFT JOIN PostTag pt ON pt.PostId = p.id
-                              LEFT JOIN Tag t ON t.id = pt.id
                         WHERE IsApproved = 1 AND PublishDateTime < SYSDATETIME()";
                     var reader = cmd.ExecuteReader();
 
@@ -43,7 +41,11 @@ namespace TabloidMVC.Repositories
 
                     while (reader.Read())
                     {
-                        posts.Add(NewPostFromReader(reader));
+                        Post post = NewPostFromReader(reader);
+                        if (post.DELETED != true)
+                        {
+                            posts.Add(post);
+                        }
                     }
 
                     reader.Close();
@@ -145,11 +147,11 @@ namespace TabloidMVC.Repositories
                     cmd.CommandText = @"
                         INSERT INTO Post (
                             Title, Content, ImageLocation, CreateDateTime, PublishDateTime,
-                            IsApproved, CategoryId, UserProfileId )
+                            IsApproved, CategoryId, UserProfileId, DELETED )
                         OUTPUT INSERTED.ID
                         VALUES (
                             @Title, @Content, @ImageLocation, @CreateDateTime, @PublishDateTime,
-                            @IsApproved, @CategoryId, @UserProfileId )";
+                            @IsApproved, @CategoryId, @UserProfileId, @DELETED )";
 
 
                     cmd.Parameters.AddWithValue("@Title", post.Title);
@@ -160,9 +162,9 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@IsApproved", post.IsApproved);
                     cmd.Parameters.AddWithValue("@CategoryId", post.CategoryId);
                     cmd.Parameters.AddWithValue("@UserProfileId", post.UserProfileId);
+                    cmd.Parameters.AddWithValue("@DELETED", post.DELETED);
 
-
-                    post.Id = (int)cmd.ExecuteScalar();
+                   post.Id = (int)cmd.ExecuteScalar();
                 }
                
             }
@@ -220,6 +222,9 @@ namespace TabloidMVC.Repositories
                 CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
                 PublishDateTime = DbUtils.GetNullableDateTime(reader, "PublishDateTime"),
                 CategoryId = reader.GetInt32(reader.GetOrdinal("CategoryId")),
+                DELETED = reader.IsDBNull(reader.GetOrdinal("DELETED"))
+                ? false
+                : reader.GetBoolean(reader.GetOrdinal("DELETED")),
                 Category = new Category()
                 {
                     Id = reader.GetInt32(reader.GetOrdinal("CategoryId")),
@@ -253,7 +258,8 @@ namespace TabloidMVC.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                            DELETE FROM Post
+                            UPDATE Post
+                            SET DELETED = 1
                             WHERE Id = @id
                         ";
 

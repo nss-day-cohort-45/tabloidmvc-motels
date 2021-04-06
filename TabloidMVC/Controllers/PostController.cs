@@ -35,7 +35,7 @@ namespace TabloidMVC.Controllers
                 Posts = posts,
                 Tags = tags
             };
-
+            
             return View(vm);
         }
 
@@ -91,6 +91,7 @@ namespace TabloidMVC.Controllers
                 vm.Post.CreateDateTime = DateAndTime.Now;
                 vm.Post.IsApproved = true;
                 vm.Post.UserProfileId = GetCurrentUserProfileId();
+                vm.Post.DELETED = false;
                 
                 _postRepository.Add(vm.Post);
 

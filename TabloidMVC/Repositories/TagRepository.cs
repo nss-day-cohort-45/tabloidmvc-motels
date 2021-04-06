@@ -125,7 +125,7 @@ namespace TabloidMVC.Repositories
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT t.Name, pt.PostId FROM Tag t 
+                    cmd.CommandText = @"SELECT t.Name, pt.PostId, t.Id FROM Tag t 
                                         LEFT JOIN PostTag pt ON t.Id = pt.TagId 
                                         LEFT JOIN Post p ON p.Id = pt.PostId
                                         WHERE pt.PostId IS NOT NULL";
@@ -139,6 +139,7 @@ namespace TabloidMVC.Repositories
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
+                            PostId = reader.GetInt32(reader.GetOrdinal("PostId"))
                         };
                         tags.Add(tag);
                     }
