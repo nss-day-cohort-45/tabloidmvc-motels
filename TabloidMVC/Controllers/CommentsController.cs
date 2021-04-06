@@ -135,14 +135,14 @@ namespace TabloidMVC.Controllers
 
         // GET: DogsController/Delete/5
         [Authorize]
-        public ActionResult Delete(int id)
+        public ActionResult Delete(int id) //this id is the comment id 
         {
-            Comment comment = _commentRepo.GetCommentById(id);
-            int ownerId = GetCurrentUserId();
+            Comment comment = _commentRepo.GetCommentById(id); //this comment does have the correct PostId
 
+            int ownerId = GetCurrentUserId();
             if (comment.UserProfileId == ownerId)
             {
-                return RedirectToAction("Index");
+                return View(comment); //this comment does have the correct PostId
             }
             else
             {
@@ -155,11 +155,13 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, Comment comment)
         {
+            var databaseComment = _commentRepo.GetCommentById(id);
+
             try
             {
                 _commentRepo.DeleteComment(id);
 
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { id = databaseComment.PostId });
             }
             catch (Exception ex)
             {
