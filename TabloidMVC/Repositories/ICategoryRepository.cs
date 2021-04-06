@@ -6,7 +6,10 @@ namespace TabloidMVC.Repositories
     public interface ICategoryRepository
     {
         List<Category> GetAll();
-        //void AddComment(Comment comment);
+        void AddCat(Category category);
+        void DeleteCat(int categoryId);
+        Category GetCatById(int id);
+        void UpdateCat(Category category);
 
     }
 }
