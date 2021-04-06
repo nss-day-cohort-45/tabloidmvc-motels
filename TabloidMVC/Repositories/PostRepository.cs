@@ -28,7 +28,8 @@ namespace TabloidMVC.Repositories
                               u.FirstName, u.LastName, u.DisplayName, 
                               u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
                               u.UserTypeId, 
-                              ut.[Name] AS UserTypeName
+                              ut.[Name] AS UserTypeName,
+                              p.DELETED
                          FROM Post p
                               LEFT JOIN Category c ON p.CategoryId = c.id
                               LEFT JOIN UserProfile u ON p.UserProfileId = u.id
@@ -40,7 +41,11 @@ namespace TabloidMVC.Repositories
 
                     while (reader.Read())
                     {
-                        posts.Add(NewPostFromReader(reader));
+                        Post post = NewPostFromReader(reader);
+                        if (post.DELETED != true)
+                        {
+                            posts.Add(post);
+                        }
                     }
 
                     reader.Close();
@@ -61,7 +66,7 @@ namespace TabloidMVC.Repositories
                        SELECT p.Id, p.Title, p.Content, 
                               p.ImageLocation AS HeaderImage,
                               p.CreateDateTime, p.PublishDateTime, p.IsApproved,
-                              p.CategoryId, p.UserProfileId,
+                              p.CategoryId, p.UserProfileId, p.DELETED,
                               c.[Name] AS CategoryName,
                               u.FirstName, u.LastName, u.DisplayName, 
                               u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
@@ -102,7 +107,7 @@ namespace TabloidMVC.Repositories
                        SELECT p.Id, p.Title, p.Content, 
                               p.ImageLocation AS HeaderImage,
                               p.CreateDateTime, p.PublishDateTime, p.IsApproved,
-                              p.CategoryId, p.UserProfileId,
+                              p.CategoryId, p.UserProfileId, p.DELETED, 
                               c.[Name] AS CategoryName,
                               u.FirstName, u.LastName, u.DisplayName, 
                               u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
@@ -142,11 +147,13 @@ namespace TabloidMVC.Repositories
                     cmd.CommandText = @"
                         INSERT INTO Post (
                             Title, Content, ImageLocation, CreateDateTime, PublishDateTime,
-                            IsApproved, CategoryId, UserProfileId )
+                            IsApproved, CategoryId, UserProfileId, DELETED )
                         OUTPUT INSERTED.ID
                         VALUES (
                             @Title, @Content, @ImageLocation, @CreateDateTime, @PublishDateTime,
-                            @IsApproved, @CategoryId, @UserProfileId )";
+                            @IsApproved, @CategoryId, @UserProfileId, @DELETED )";
+
+
                     cmd.Parameters.AddWithValue("@Title", post.Title);
                     cmd.Parameters.AddWithValue("@Content", post.Content);
                     cmd.Parameters.AddWithValue("@ImageLocation", DbUtils.ValueOrDBNull(post.ImageLocation));
@@ -155,9 +162,11 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@IsApproved", post.IsApproved);
                     cmd.Parameters.AddWithValue("@CategoryId", post.CategoryId);
                     cmd.Parameters.AddWithValue("@UserProfileId", post.UserProfileId);
+                    cmd.Parameters.AddWithValue("@DELETED", post.DELETED);
 
-                    post.Id = (int)cmd.ExecuteScalar();
+                   post.Id = (int)cmd.ExecuteScalar();
                 }
+               
             }
         }
 
@@ -169,7 +178,7 @@ namespace TabloidMVC.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        UPDATE Post 
+                        UPDATE Post  
                             SET
                             Title = @title,
                             Content = @content,
@@ -179,7 +188,11 @@ namespace TabloidMVC.Repositories
                             IsApproved = @isApproved,
                             CategoryId = @categoryId,
                             UserProfileId = @userProfileId
-                        WHERE id = @id";
+                        WHERE id = @id ;
+                          
+                        UPDATE PostTag 
+                            SET TagId = @tagId
+                        WHERE PostId = @id";
 
                     cmd.Parameters.AddWithValue("@title", post.Title);
                     cmd.Parameters.AddWithValue("@content", post.Content);
@@ -190,8 +203,10 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@categoryId", post.CategoryId);
                     cmd.Parameters.AddWithValue("@userProfileId", post.UserProfileId);
                     cmd.Parameters.AddWithValue("@id", post.Id);
+                    cmd.Parameters.AddWithValue("@tagId", post.Tag);
 
                     cmd.ExecuteNonQuery();
+
                 }
             }
         }
@@ -207,6 +222,9 @@ namespace TabloidMVC.Repositories
                 CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
                 PublishDateTime = DbUtils.GetNullableDateTime(reader, "PublishDateTime"),
                 CategoryId = reader.GetInt32(reader.GetOrdinal("CategoryId")),
+                DELETED = reader.IsDBNull(reader.GetOrdinal("DELETED"))
+                ? false
+                : reader.GetBoolean(reader.GetOrdinal("DELETED")),
                 Category = new Category()
                 {
                     Id = reader.GetInt32(reader.GetOrdinal("CategoryId")),
@@ -231,9 +249,6 @@ namespace TabloidMVC.Repositories
                 }
             };
         }
-
-
-
         public void DeletePost(int postId)
         {
             using (SqlConnection conn = Connection)
@@ -243,13 +258,86 @@ namespace TabloidMVC.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                            DELETE FROM Post
+                            UPDATE Post
+                            SET DELETED = 1
                             WHERE Id = @id
                         ";
 
                     cmd.Parameters.AddWithValue("@id", postId);
 
                     cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public void InsertTag(int postId, int tagId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO PostTag (PostId, TagId)
+                                        VALUES (@postId, @tagId)";
+
+                    cmd.Parameters.AddWithValue("@postId", postId);
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void DeleteTag(int postId, int tagId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"DELETE FROM PostTag
+                                        WHERE PostId = @postId 
+                                        AND TagId = @tagId";
+                    cmd.Parameters.AddWithValue("@postId", postId);
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public List<Post> GetTagByPostId(int postId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    SELECT *
+                    FROM Post p
+                    LEFT JOIN PostTag pt ON pt.PostId = p.id
+                    LEFT JOIN Tag t ON t.Id = pt.TagId
+                    WHERE p.Id = @id";
+
+                    cmd.Parameters.AddWithValue("@id", postId);
+
+                    var reader = cmd.ExecuteReader();
+                    var posts = new List<Post>();
+                    while (reader.Read())
+                    {
+                        Post post = new Post
+                        {
+                           
+                            tag = new Tag
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name"))
+                            },
+
+                        };
+                        posts.Add(post);
+                    }
+                    reader.Close();
+                    return posts;
                 }
             }
         }

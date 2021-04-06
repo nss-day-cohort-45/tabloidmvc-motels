@@ -5,13 +5,9 @@ using System.Threading.Tasks;
 
 namespace TabloidMVC.Models.ViewModels
 {
-    public class PostEditViewModel
+    public class PostDetailsViewModel
     {
         public Post Post { get; set; }
-        public List<Category> CategoryOptions { get; set; }
-        public List<Tag> Tags { get; set; }
-        public Tag Tag { get; set; }
+        public List<Post> TagsByPostId { get; set; }
     }
-
 }
-

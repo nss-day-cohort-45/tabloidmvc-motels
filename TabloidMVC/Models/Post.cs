@@ -33,5 +33,11 @@ namespace TabloidMVC.Models
         [DisplayName("Author")]
         public int UserProfileId { get; set; }
         public UserProfile UserProfile { get; set; }
+
+        [DisplayName("Tags")]
+        public string Tag { get; set; }
+        public Tag tag { get; set; }
+
+        public bool DELETED { get; set; }
     }
 }
